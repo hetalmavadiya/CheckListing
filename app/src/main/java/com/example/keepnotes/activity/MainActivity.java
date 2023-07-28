@@ -32,17 +32,14 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
          sessionManage = new SessionManage(this);
 
-        uncheckedItemsAdapter = new ChecklistAdapter(uncheckedItemsList,sessionManage);
-        checkedItemsAdapter = new ChecklistAdapter(checkedItemsList,sessionManage);
-
         RecyclerView recyclerViewUnchecked = findViewById(R.id.recycler_view_unchecked);
         recyclerViewUnchecked.setLayoutManager(new LinearLayoutManager(this));
-        uncheckedItemsAdapter = new ChecklistAdapter(uncheckedItemsList,sessionManage);
+        uncheckedItemsAdapter = new ChecklistAdapter(uncheckedItemsList, sessionManage);
         recyclerViewUnchecked.setAdapter(uncheckedItemsAdapter);
 
         RecyclerView recyclerViewChecked = findViewById(R.id.recycler_view_checked);
         recyclerViewChecked.setLayoutManager(new LinearLayoutManager(this));
-        checkedItemsAdapter = new ChecklistAdapter(checkedItemsList,sessionManage);
+        checkedItemsAdapter = new ChecklistAdapter(checkedItemsList, sessionManage);
         recyclerViewChecked.setAdapter(checkedItemsAdapter);
 
         ImageView btnAdd = findViewById(R.id.btnAdd);

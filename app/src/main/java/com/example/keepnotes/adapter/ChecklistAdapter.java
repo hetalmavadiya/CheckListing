@@ -15,10 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.keepnotes.Model.ChecklistItem;
 import com.example.keepnotes.R;
 import com.example.keepnotes.helper.SessionManage;
-
 import java.util.List;
-
-
 public class ChecklistAdapter extends RecyclerView.Adapter<ChecklistAdapter.ChecklistViewHolder> {
 
     private List<ChecklistItem> itemList;
@@ -46,25 +43,35 @@ public class ChecklistAdapter extends RecyclerView.Adapter<ChecklistAdapter.Chec
         ChecklistItem item = itemList.get(position);
 
         holder.checkBox.setChecked(item.isChecked());
-        holder.editText.setText(item.getItemName());
 
-        holder.editText.addTextChangedListener(new TextWatcher() {
+        // Remove the text change listener before setting the text
+        holder.editText.removeTextChangedListener(holder.textWatcher);
+        holder.editText.setText(item.getItemName());
+        holder.editText.setTag(position); // Set the position as the tag to identify the EditText
+
+        // Create a new TextWatcher and set it to the EditText
+        holder.textWatcher = new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
             }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                item.setItemName(s.toString());
-                if (listener != null) {
-                    listener.onItemNameChanged(item);
+                int adapterPosition = (int) holder.editText.getTag(); // Get the position from the tag
+                if (adapterPosition != RecyclerView.NO_POSITION) {
+                    ChecklistItem item = itemList.get(adapterPosition);
+                    item.setItemName(s.toString());
+                    if (listener != null) {
+                        listener.onItemNameChanged(item);
+                    }
                 }
             }
 
             @Override
             public void afterTextChanged(Editable s) {
             }
-        });
+        };
+        holder.editText.addTextChangedListener(holder.textWatcher);
 
         holder.checkBox.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -79,9 +86,6 @@ public class ChecklistAdapter extends RecyclerView.Adapter<ChecklistAdapter.Chec
         holder.deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                ChecklistItem item = itemList.get(holder.getAdapterPosition());
-
                 if (item.isChecked()) {
                     sessionManage.removeCheckedItem(item);
                 } else {
@@ -105,7 +109,6 @@ public class ChecklistAdapter extends RecyclerView.Adapter<ChecklistAdapter.Chec
 
     public interface OnCheckedChangeListener {
         void onCheckedChanged(ChecklistItem item);
-
         void onItemNameChanged(ChecklistItem item);
     }
 
@@ -113,6 +116,8 @@ public class ChecklistAdapter extends RecyclerView.Adapter<ChecklistAdapter.Chec
         private CheckBox checkBox;
         private EditText editText;
         private ImageView deleteButton;
+
+        private TextWatcher textWatcher;
 
         public ChecklistViewHolder(@NonNull View itemView) {
             super(itemView);
