@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.keepnotes.Model.ChecklistItem;
 import com.example.keepnotes.R;
+import com.example.keepnotes.helper.SessionManage;
 
 import java.util.List;
 
@@ -21,10 +22,16 @@ import java.util.List;
 public class ChecklistAdapter extends RecyclerView.Adapter<ChecklistAdapter.ChecklistViewHolder> {
 
     private List<ChecklistItem> itemList;
+    private SessionManage sessionManage;
     private OnCheckedChangeListener listener;
 
-    public ChecklistAdapter(List<ChecklistItem> itemList) {
+    public ChecklistAdapter(List<ChecklistItem> itemList, SessionManage sessionManage) {
         this.itemList = itemList;
+        this.sessionManage = sessionManage;
+    }
+
+    public List<ChecklistItem> getItemList() {
+        return itemList;
     }
 
     @NonNull
@@ -72,6 +79,15 @@ public class ChecklistAdapter extends RecyclerView.Adapter<ChecklistAdapter.Chec
         holder.deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                ChecklistItem item = itemList.get(holder.getAdapterPosition());
+
+                if (item.isChecked()) {
+                    sessionManage.removeCheckedItem(item);
+                } else {
+                    sessionManage.removeUncheckedItem(item);
+                }
+
                 itemList.remove(item);
                 notifyDataSetChanged();
             }
@@ -89,6 +105,7 @@ public class ChecklistAdapter extends RecyclerView.Adapter<ChecklistAdapter.Chec
 
     public interface OnCheckedChangeListener {
         void onCheckedChanged(ChecklistItem item);
+
         void onItemNameChanged(ChecklistItem item);
     }
 

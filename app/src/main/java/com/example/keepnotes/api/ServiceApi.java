@@ -10,7 +10,6 @@ import retrofit2.http.Path;
 
 public interface ServiceApi {
 
-
     @Headers({"Content-Type: application/json;charset=UTF-8"})
     @GET("todos")
     Call<MainModel> getfakemodel();

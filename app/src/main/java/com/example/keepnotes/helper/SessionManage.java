@@ -49,8 +49,16 @@ public class SessionManage {
         return gson.fromJson(checkedItemsJson, itemType);
     }
 
-    public void clearSession() {
-        sharedPreferences.edit().clear().apply();
+    public void removeUncheckedItem(ChecklistItem item) {
+        List<ChecklistItem> uncheckedItems = loadUncheckedItems();
+        uncheckedItems.remove(item);
+        saveUncheckedItems(uncheckedItems);
+    }
+
+    public void removeCheckedItem(ChecklistItem item) {
+        List<ChecklistItem> checkedItems = loadCheckedItems();
+        checkedItems.remove(item);
+        saveCheckedItems(checkedItems);
     }
 
 

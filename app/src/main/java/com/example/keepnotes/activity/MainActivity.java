@@ -13,30 +13,36 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.keepnotes.Model.ChecklistItem;
 import com.example.keepnotes.R;
 import com.example.keepnotes.adapter.ChecklistAdapter;
+import com.example.keepnotes.helper.SessionManage;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-
     private List<ChecklistItem> uncheckedItemsList = new ArrayList<>();
     private List<ChecklistItem> checkedItemsList = new ArrayList<>();
     private ChecklistAdapter uncheckedItemsAdapter;
     private ChecklistAdapter checkedItemsAdapter;
 
+    private SessionManage sessionManage;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+         sessionManage = new SessionManage(this);
+
+        uncheckedItemsAdapter = new ChecklistAdapter(uncheckedItemsList,sessionManage);
+        checkedItemsAdapter = new ChecklistAdapter(checkedItemsList,sessionManage);
 
         RecyclerView recyclerViewUnchecked = findViewById(R.id.recycler_view_unchecked);
         recyclerViewUnchecked.setLayoutManager(new LinearLayoutManager(this));
-        uncheckedItemsAdapter = new ChecklistAdapter(uncheckedItemsList);
+        uncheckedItemsAdapter = new ChecklistAdapter(uncheckedItemsList,sessionManage);
         recyclerViewUnchecked.setAdapter(uncheckedItemsAdapter);
 
         RecyclerView recyclerViewChecked = findViewById(R.id.recycler_view_checked);
         recyclerViewChecked.setLayoutManager(new LinearLayoutManager(this));
-        checkedItemsAdapter = new ChecklistAdapter(checkedItemsList);
+        checkedItemsAdapter = new ChecklistAdapter(checkedItemsList,sessionManage);
         recyclerViewChecked.setAdapter(checkedItemsAdapter);
 
         ImageView btnAdd = findViewById(R.id.btnAdd);
@@ -61,7 +67,6 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onItemNameChanged(ChecklistItem item) {
-                // Handle itemName changes in uncheckedItemsAdapter if needed
             }
         });
 
@@ -77,7 +82,6 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onItemNameChanged(ChecklistItem item) {
-                // Handle itemName changes in checkedItemsAdapter if needed
             }
         });
     }
@@ -89,7 +93,40 @@ public class MainActivity extends AppCompatActivity {
             uncheckedItemsList.add(newItem);
             uncheckedItemsAdapter.notifyItemInserted(uncheckedItemsList.size() - 1);
             editTextNewItem.setText("");
-            editTextNewItem.clearFocus(); // Clears the focus from EditText
+            editTextNewItem.clearFocus();
+        }
+    }
+    @Override
+    protected void onPause() {
+        super.onPause();
+        saveDataToSession();
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadDataFromSession();
+    }
+
+    private void saveDataToSession() {
+        List<ChecklistItem> uncheckedItems = uncheckedItemsAdapter.getItemList();
+        List<ChecklistItem> checkedItems = checkedItemsAdapter.getItemList();
+        sessionManage.saveUncheckedItems(uncheckedItems);
+        sessionManage.saveCheckedItems(checkedItems);
+    }
+
+    private void loadDataFromSession() {
+        List<ChecklistItem> savedUncheckedItems = sessionManage.loadUncheckedItems();
+        if (savedUncheckedItems != null) {
+            uncheckedItemsList.clear();
+            uncheckedItemsList.addAll(savedUncheckedItems);
+            uncheckedItemsAdapter.notifyDataSetChanged();
+        }
+
+        List<ChecklistItem> savedCheckedItems = sessionManage.loadCheckedItems();
+        if (savedCheckedItems != null) {
+            checkedItemsList.clear();
+            checkedItemsList.addAll(savedCheckedItems);
+            checkedItemsAdapter.notifyDataSetChanged();
         }
     }
 }
