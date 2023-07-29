@@ -5,8 +5,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -23,32 +25,33 @@ public class MainActivity extends AppCompatActivity {
     private List<ChecklistItem> checkedItemsList = new ArrayList<>();
     private ChecklistAdapter uncheckedItemsAdapter;
     private ChecklistAdapter checkedItemsAdapter;
-
+    private RecyclerView recyclerViewUnchecked, recyclerViewChecked;
+    private EditText editTextNewItem;
+    private ImageView btnAdd;
+    TextView txt_unchecked, txt_checked;
     private SessionManage sessionManage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-         sessionManage = new SessionManage(this);
+        sessionManage = new SessionManage(this);
+        init();
+        editTextNewItem = findViewById(R.id.editTextNewItem);
 
-        RecyclerView recyclerViewUnchecked = findViewById(R.id.recycler_view_unchecked);
         recyclerViewUnchecked.setLayoutManager(new LinearLayoutManager(this));
         uncheckedItemsAdapter = new ChecklistAdapter(uncheckedItemsList, sessionManage);
         recyclerViewUnchecked.setAdapter(uncheckedItemsAdapter);
 
-        RecyclerView recyclerViewChecked = findViewById(R.id.recycler_view_checked);
         recyclerViewChecked.setLayoutManager(new LinearLayoutManager(this));
         checkedItemsAdapter = new ChecklistAdapter(checkedItemsList, sessionManage);
         recyclerViewChecked.setAdapter(checkedItemsAdapter);
-
-        ImageView btnAdd = findViewById(R.id.btnAdd);
-        final EditText editTextNewItem = findViewById(R.id.editTextNewItem);
 
         btnAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 addItem(editTextNewItem);
+                updateItemCount();
             }
         });
 
@@ -60,10 +63,16 @@ public class MainActivity extends AppCompatActivity {
                 checkedItemsList.add(new ChecklistItem(item.getItemName(), true));
                 uncheckedItemsAdapter.notifyDataSetChanged();
                 checkedItemsAdapter.notifyDataSetChanged();
+                updateItemCount();
             }
 
             @Override
             public void onItemNameChanged(ChecklistItem item) {
+            }
+
+            @Override
+            public void onDeleteItem() {
+                updateItemCount();
             }
         });
 
@@ -75,13 +84,30 @@ public class MainActivity extends AppCompatActivity {
                 uncheckedItemsList.add(new ChecklistItem(item.getItemName(), false));
                 checkedItemsAdapter.notifyDataSetChanged();
                 uncheckedItemsAdapter.notifyDataSetChanged();
+                updateItemCount();
             }
 
             @Override
             public void onItemNameChanged(ChecklistItem item) {
             }
+
+            @Override
+            public void onDeleteItem() {
+                updateItemCount();
+            }
         });
+
+        loadDataFromSession();
     }
+
+    private void init() {
+        recyclerViewUnchecked = findViewById(R.id.recycler_view_unchecked);
+        recyclerViewChecked = findViewById(R.id.recycler_view_checked);
+        btnAdd = findViewById(R.id.btnAdd);
+        txt_checked = (TextView) findViewById(R.id.txt_checked);
+        txt_unchecked = (TextView) findViewById(R.id.txt_unchecked);
+    }
+
 
     private void addItem(EditText editTextNewItem) {
         String newItemName = editTextNewItem.getText().toString().trim();
@@ -93,11 +119,13 @@ public class MainActivity extends AppCompatActivity {
             editTextNewItem.clearFocus();
         }
     }
+
     @Override
     protected void onPause() {
         super.onPause();
         saveDataToSession();
     }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -125,5 +153,11 @@ public class MainActivity extends AppCompatActivity {
             checkedItemsList.addAll(savedCheckedItems);
             checkedItemsAdapter.notifyDataSetChanged();
         }
+    }
+    private void updateItemCount() {
+        int uncheckedCount = uncheckedItemsList.size();
+        int checkedCount = checkedItemsList.size();
+        txt_unchecked.setText("Unchecked items: " + uncheckedCount);
+        txt_checked.setText("Checked items: " + checkedCount);
     }
 }

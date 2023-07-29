@@ -15,7 +15,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.keepnotes.Model.ChecklistItem;
 import com.example.keepnotes.R;
 import com.example.keepnotes.helper.SessionManage;
+
 import java.util.List;
+
 public class ChecklistAdapter extends RecyclerView.Adapter<ChecklistAdapter.ChecklistViewHolder> {
 
     private List<ChecklistItem> itemList;
@@ -94,6 +96,11 @@ public class ChecklistAdapter extends RecyclerView.Adapter<ChecklistAdapter.Chec
 
                 itemList.remove(item);
                 notifyDataSetChanged();
+
+                // Call onDeleteItem method in the listener to notify MainActivity of item deletion
+                if (listener != null) {
+                    listener.onDeleteItem();
+                }
             }
         });
     }
@@ -109,7 +116,10 @@ public class ChecklistAdapter extends RecyclerView.Adapter<ChecklistAdapter.Chec
 
     public interface OnCheckedChangeListener {
         void onCheckedChanged(ChecklistItem item);
+
         void onItemNameChanged(ChecklistItem item);
+
+        void onDeleteItem();
     }
 
     public static class ChecklistViewHolder extends RecyclerView.ViewHolder {
